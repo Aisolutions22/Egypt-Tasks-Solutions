@@ -41,7 +41,28 @@ export const sendTaskEmail = createServerFn({ method: "POST" })
       });
       const text = await res.text().catch(() => "");
       console.log(`[apps-script-email] to=${data.to} status=${res.status} body=${text.slice(0, 300)}`);
-      return { ok: res.ok, status: res.status, body: text.slice(0, 300) };
+
+      // Don't trust the HTTP status alone — Google's login/permission pages
+      // also return 200. Parse the body as JSON and check the `ok` field,
+      // mirroring the validation already done in drive-upload.functions.ts.
+      if (!res.ok) {
+        return { ok: false, error: `apps-script http ${res.status}` };
+      }
+
+      let json: { ok?: boolean; error?: string };
+      try {
+        json = JSON.parse(text);
+      } catch {
+        console.error(`[apps-script-email] JSON parse failed to=${data.to} body=${text.slice(0, 300)}`);
+        return { ok: false, error: "استجابة غير صالحة من خادم الإيميل" };
+      }
+
+      if (!json.ok) {
+        console.error(`[apps-script-email] apps-script ok:false to=${data.to}`, json);
+        return { ok: false, error: json.error || "فشل إرسال الإيميل" };
+      }
+
+      return { ok: true };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error(`[apps-script-email] fetch failed to=${data.to} err=${msg}`);
