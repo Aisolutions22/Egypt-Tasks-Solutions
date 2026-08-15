@@ -130,7 +130,7 @@ function SettingsPage() {
         },
       });
       if (!res.ok) {
-        toast.error(res.error || "فشل رفع الصورة إلى Google Drive");
+        toast.error(res.error || "فشل رفع الصورة إلى Google Drive", { duration: 8000 });
         return;
       }
       const url = `https://drive.google.com/thumbnail?id=${res.driveFileId}&sz=w400`;
@@ -141,7 +141,7 @@ function SettingsPage() {
       qc.invalidateQueries({ queryKey: ["profiles"] });
       setCropSrc(null);
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "فشل رفع الصورة إلى Google Drive");
+      toast.error(err instanceof Error ? err.message : "فشل رفع الصورة إلى Google Drive", { duration: 8000 });
     } finally {
       setUploading(false);
     }

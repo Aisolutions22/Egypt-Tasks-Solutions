@@ -333,7 +333,7 @@ function TaskDetail() {
         },
       });
       if (!res.ok) {
-        toast.error(res.error || "فشل رفع الملف إلى Google Drive");
+        toast.error(res.error || "فشل رفع الملف إلى Google Drive", { duration: 8000 });
         return;
       }
       const { data: inserted, error: insErr } = await supabase.from("task_attachments").insert({
@@ -357,7 +357,7 @@ function TaskDetail() {
       setPendingFile(null);
       setDisplayName("");
     } catch (err) {
-      toast.error(`فشل رفع الملف: ${(err as Error)?.message ?? "خطأ غير متوقع"}`);
+      toast.error(`فشل رفع الملف: ${(err as Error)?.message ?? "خطأ غير متوقع"}`, { duration: 8000 });
     } finally {
       setUploading(false);
     }
