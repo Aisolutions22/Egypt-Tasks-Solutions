@@ -38,41 +38,62 @@ export const uploadDriveFileNative = createServerFn({ method: "POST" })
 
       const { data: settings } = await context.supabase
         .from("app_settings")
-        .select("company_name")
+        .select("company_name, drive_folder_id")
         .eq("id", 1)
         .single();
       const companyName =
         (settings as { company_name?: string } | null)?.company_name ?? "Ai Tasks Solutions";
+      const cachedFolderId =
+        (settings as { drive_folder_id?: string | null } | null)?.drive_folder_id ?? undefined;
 
       const dotIdx = data.fileName.lastIndexOf(".");
       const extension = dotIdx >= 0 ? data.fileName.slice(dotIdx) : "";
       const finalName = `${data.displayName}${extension}`;
 
-      // Find or create the company folder (only folders this app created are visible with drive.file scope).
-      let folderId: string | undefined;
-      const q = encodeURIComponent(
-        `mimeType='application/vnd.google-apps.folder' and name='${companyName.replace(/'/g, "\\'")}' and trashed=false`,
-      );
-      const listRes = await fetch(`${GATEWAY}/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=1`, {
-        headers: authHeaders,
-      });
-      if (listRes.ok) {
-        const listJson = (await listRes.json()) as { files?: Array<{ id: string }> };
-        folderId = listJson.files?.[0]?.id;
-      } else {
-        console.error("[drive-native] folder list failed", listRes.status, (await listRes.text()).slice(0, 500));
-      }
+      // Use the cached company folder when available — skips both extra round trips.
+      let folderId: string | undefined = cachedFolderId || undefined;
 
       if (!folderId) {
-        const createRes = await fetch(`${GATEWAY}/drive/v3/files?fields=id`, {
-          method: "POST",
-          headers: { ...authHeaders, "Content-Type": "application/json" },
-          body: JSON.stringify({ name: companyName, mimeType: "application/vnd.google-apps.folder" }),
+        // Find or create the company folder (only folders this app created are visible with drive.file scope).
+        const q = encodeURIComponent(
+          `mimeType='application/vnd.google-apps.folder' and name='${companyName.replace(/'/g, "\\'")}' and trashed=false`,
+        );
+        const listRes = await fetch(`${GATEWAY}/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=1`, {
+          headers: authHeaders,
         });
-        if (createRes.ok) {
-          folderId = ((await createRes.json()) as { id?: string }).id;
+        if (listRes.ok) {
+          const listJson = (await listRes.json()) as { files?: Array<{ id: string }> };
+          folderId = listJson.files?.[0]?.id;
         } else {
-          console.error("[drive-native] folder create failed", createRes.status, (await createRes.text()).slice(0, 500));
+          console.error("[drive-native] folder list failed", listRes.status, (await listRes.text()).slice(0, 500));
+        }
+
+        if (!folderId) {
+          const createRes = await fetch(`${GATEWAY}/drive/v3/files?fields=id`, {
+            method: "POST",
+            headers: { ...authHeaders, "Content-Type": "application/json" },
+            body: JSON.stringify({ name: companyName, mimeType: "application/vnd.google-apps.folder" }),
+          });
+          if (createRes.ok) {
+            folderId = ((await createRes.json()) as { id?: string }).id;
+          } else {
+            console.error("[drive-native] folder create failed", createRes.status, (await createRes.text()).slice(0, 500));
+          }
+        }
+
+        if (folderId) {
+          try {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            const { error: cacheErr } = await supabaseAdmin
+              .from("app_settings")
+              .update({ drive_folder_id: folderId })
+              .eq("id", 1);
+            if (cacheErr) {
+              console.error("[drive-native] folder cache save failed", cacheErr.message);
+            }
+          } catch (e) {
+            console.error("[drive-native] folder cache save error", (e as Error).message);
+          }
         }
       }
 
@@ -95,14 +116,22 @@ export const uploadDriveFileNative = createServerFn({ method: "POST" })
       body.set(bytes, head.length);
       body.set(tail, head.length + bytes.length);
 
-      const uploadRes = await fetch(
-        `${GATEWAY}/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`,
-        {
+      const doUpload = () =>
+        fetch(`${GATEWAY}/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`, {
           method: "POST",
           headers: { ...authHeaders, "Content-Type": `multipart/related; boundary=${boundary}` },
           body,
-        },
-      );
+        });
+
+      // One immediate retry, but only for network-level failures (thrown fetch
+      // errors / timeouts) — never for auth or other HTTP status responses.
+      let uploadRes: Response;
+      try {
+        uploadRes = await doUpload();
+      } catch (netErr) {
+        console.error("[drive-native] upload network error, retrying once", (netErr as Error).message);
+        uploadRes = await doUpload();
+      }
 
       const text = await uploadRes.text();
       if (!uploadRes.ok) {

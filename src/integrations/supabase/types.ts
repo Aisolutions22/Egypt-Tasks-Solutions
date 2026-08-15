@@ -18,16 +18,19 @@ export type Database = {
         Row: {
           company_name: string
           default_deadline_days: number
+          drive_folder_id: string | null
           id: number
         }
         Insert: {
           company_name?: string
           default_deadline_days?: number
+          drive_folder_id?: string | null
           id?: number
         }
         Update: {
           company_name?: string
           default_deadline_days?: number
+          drive_folder_id?: string | null
           id?: number
         }
         Relationships: []
