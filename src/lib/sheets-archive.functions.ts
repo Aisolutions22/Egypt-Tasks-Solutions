@@ -74,40 +74,74 @@ export async function getAccessToken(
   return json.access_token;
 }
 
+const GATEWAY = "https://connector-gateway.lovable.dev/google_sheets";
+
 export const archiveMessageToSheet = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => InputSchema.parse(data))
   .handler(async ({ data }) => {
-    try {
-      const saJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-      const rawSheetId = process.env.GOOGLE_SHEET_ID;
-      if (!saJson || !rawSheetId) {
-        console.error("[sheets-archive] missing GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_SHEET_ID");
-        return { ok: false as const };
-      }
-      const urlMatch = rawSheetId.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-      const sheetId = (urlMatch ? urlMatch[1] : rawSheetId).trim();
-      const sa = JSON.parse(saJson) as { client_email: string; private_key: string };
-      const accessToken = await getAccessToken(sa.client_email, sa.private_key, "https://www.googleapis.com/auth/spreadsheets");
+    const lovableKey = process.env["LOVABLE_API_KEY"];
+    const sheetsKey = process.env["GOOGLE_SHEETS_API_KEY"];
+    const rawSheetId = process.env["GOOGLE_SHEET_ID"];
 
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1!A:F:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          values: [[data.whenText, data.taskTitle, data.taskDetails, data.type, data.senderName, data.content]],
-        }),
+    if (!lovableKey || !sheetsKey) {
+      console.error("[sheets-archive] missing credentials", {
+        hasLovableKey: Boolean(lovableKey),
+        hasGoogleSheetsKey: Boolean(sheetsKey),
       });
+      return { ok: false as const, error: "تكامل Google Sheets غير مُفعّل. برجاء ربط Google Sheets من الإعدادات." };
+    }
+    if (!rawSheetId) {
+      console.error("[sheets-archive] missing GOOGLE_SHEET_ID");
+      return { ok: false as const, error: "لم يتم تحديد ملف الأرشيف (GOOGLE_SHEET_ID)." };
+    }
+
+    const urlMatch = rawSheetId.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    const sheetId = (urlMatch ? urlMatch[1] : rawSheetId).trim();
+
+    try {
+      const res = await fetch(
+        `${GATEWAY}/v4/spreadsheets/${sheetId}/values/Sheet1!A:F:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${lovableKey}`,
+            "X-Connection-Api-Key": sheetsKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            values: [[data.whenText, data.taskTitle, data.taskDetails, data.type, data.senderName, data.content]],
+          }),
+        },
+      );
+
+      const text = await res.text();
       if (!res.ok) {
-        console.error(`[sheets-archive] append ${res.status}: ${await res.text()}`);
-        return { ok: false as const };
+        console.error(`[sheets-archive] append failed status=${res.status} body=${text.slice(0, 800)}`);
+        if (res.status === 401 || res.status === 403) {
+          return { ok: false as const, error: "لا توجد صلاحية للكتابة في Google Sheets. برجاء إعادة ربط الحساب." };
+        }
+        if (res.status === 404) {
+          return { ok: false as const, error: "لم يتم العثور على ملف الأرشيف على Google Sheets." };
+        }
+        if (res.status === 429) {
+          return { ok: false as const, error: "تم تجاوز الحد المسموح مؤقتاً. حاول بعد قليل." };
+        }
+        return { ok: false as const, error: `فشل الأرشفة في Google Sheets (رمز ${res.status}).` };
       }
+
+      try {
+        JSON.parse(text);
+      } catch {
+        console.error(`[sheets-archive] invalid JSON response body=${text.slice(0, 500)}`);
+        return { ok: false as const, error: "استجابة غير صالحة من Google Sheets." };
+      }
+
       return { ok: true as const };
     } catch (err) {
-      console.error("[sheets-archive] error:", err);
-      return { ok: false as const };
+      const e = err as Error;
+      console.error("[sheets-archive] exception", { name: e?.name, message: e?.message });
+      return { ok: false as const, error: `تعذر الأرشفة: ${e?.message ?? "خطأ غير معروف"}` };
     }
   });
+
