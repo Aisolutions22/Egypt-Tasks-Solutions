@@ -19,7 +19,6 @@ import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAddTaskRouteImport } from './routes/_authenticated/add-task'
 import { Route as AuthenticatedAddColleagueRouteImport } from './routes/_authenticated/add-colleague'
 import { Route as ApiPublicSeedOwnerRouteImport } from './routes/api/public/seed-owner'
-import { Route as ApiPublicDebugAppsScriptRouteImport } from './routes/api/public/debug-apps-script'
 import { Route as AuthenticatedTaskIdRouteImport } from './routes/_authenticated/task/$id'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -72,12 +71,6 @@ const ApiPublicSeedOwnerRoute = ApiPublicSeedOwnerRouteImport.update({
   path: '/api/public/seed-owner',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicDebugAppsScriptRoute =
-  ApiPublicDebugAppsScriptRouteImport.update({
-    id: '/api/public/debug-apps-script',
-    path: '/api/public/debug-apps-script',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const AuthenticatedTaskIdRoute = AuthenticatedTaskIdRouteImport.update({
   id: '/task/$id',
   path: '/task/$id',
@@ -94,7 +87,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/task/$id': typeof AuthenticatedTaskIdRoute
-  '/api/public/debug-apps-script': typeof ApiPublicDebugAppsScriptRoute
   '/api/public/seed-owner': typeof ApiPublicSeedOwnerRoute
 }
 export interface FileRoutesByTo {
@@ -107,7 +99,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/task/$id': typeof AuthenticatedTaskIdRoute
-  '/api/public/debug-apps-script': typeof ApiPublicDebugAppsScriptRoute
   '/api/public/seed-owner': typeof ApiPublicSeedOwnerRoute
 }
 export interface FileRoutesById {
@@ -122,7 +113,6 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/task/$id': typeof AuthenticatedTaskIdRoute
-  '/api/public/debug-apps-script': typeof ApiPublicDebugAppsScriptRoute
   '/api/public/seed-owner': typeof ApiPublicSeedOwnerRoute
 }
 export interface FileRouteTypes {
@@ -137,7 +127,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/settings'
     | '/task/$id'
-    | '/api/public/debug-apps-script'
     | '/api/public/seed-owner'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -150,7 +139,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/settings'
     | '/task/$id'
-    | '/api/public/debug-apps-script'
     | '/api/public/seed-owner'
   id:
     | '__root__'
@@ -164,7 +152,6 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/settings'
     | '/_authenticated/task/$id'
-    | '/api/public/debug-apps-script'
     | '/api/public/seed-owner'
   fileRoutesById: FileRoutesById
 }
@@ -173,7 +160,6 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  ApiPublicDebugAppsScriptRoute: typeof ApiPublicDebugAppsScriptRoute
   ApiPublicSeedOwnerRoute: typeof ApiPublicSeedOwnerRoute
 }
 
@@ -249,13 +235,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSeedOwnerRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/debug-apps-script': {
-      id: '/api/public/debug-apps-script'
-      path: '/api/public/debug-apps-script'
-      fullPath: '/api/public/debug-apps-script'
-      preLoaderRoute: typeof ApiPublicDebugAppsScriptRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/task/$id': {
       id: '/_authenticated/task/$id'
       path: '/task/$id'
@@ -293,7 +272,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  ApiPublicDebugAppsScriptRoute: ApiPublicDebugAppsScriptRoute,
   ApiPublicSeedOwnerRoute: ApiPublicSeedOwnerRoute,
 }
 export const routeTree = rootRouteImport

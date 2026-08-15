@@ -2,7 +2,7 @@
 
 A white-label, Arabic-first (RTL) internal task-management platform built for managers who need a lightweight, permission-aware system to assign, track, and archive their team's work.
 
-Built on Lovable, backed by Supabase, with archiving to Google Sheets and file/email handling via a Google Apps Script Web App.
+Built on Lovable, backed by Supabase, with file storage, email, and archiving handled through the native Google Drive, Gmail, and Google Sheets integrations.
 
 ## Roles
 
@@ -14,27 +14,25 @@ Built on Lovable, backed by Supabase, with archiving to Google Sheets and file/e
 
 - Frontend/backend: TanStack Start (React 19)
 - Database/Auth/Realtime: Supabase, RLS enforced at DB level
-- External archive: Google Sheets API (Service Account JWT via Web Crypto API)
-- File storage + email: Google Apps Script Web App (shared-secret authenticated)
+- External archive: Google Sheets via the native connector
+- File storage + email: Google Drive and Gmail via the native connectors
 - Styling: Tailwind CSS + shadcn/ui, dark "Technicolor" animated theme
 - Font: Tajawal
 
 ## Environment Secrets Required
 
-- GOOGLE_SERVICE_ACCOUNT_JSON
-- GOOGLE_SHEET_ID
-- GOOGLE_APPS_SCRIPT_URL
-- GOOGLE_APPS_SCRIPT_SECRET
-- SEED_OWNER_TOKEN, SEED_OWNER_EMAIL, SEED_OWNER_PASSWORD
-- RESEND_API_KEY
+- GOOGLE_SHEET_ID — the spreadsheet (ID or full URL) used as the archive
+- SEED_OWNER_TOKEN, SEED_OWNER_EMAIL, SEED_OWNER_PASSWORD — one-time Owner bootstrap
+
+No Google Cloud Console project, Apps Script deployment, or service-account JSON is needed.
 
 ## Setup for a New Client
 
 1. Remix this project in Lovable
-2. Configure all secrets above
-3. Share the Google Sheet with the service account email; set the Apps Script Drive folder
+2. Open Settings → Integrations and click **Connect** on Google Drive, Gmail, and Google Sheets
+3. Set GOOGLE_SHEET_ID plus the SEED_OWNER_* secrets
 4. Visit /api/public/seed-owner?token=... once to bootstrap the Owner account
-5. Set company logo from in-app Settings
+5. Set company logo and company name from in-app Settings
 
 ## Security Notes
 
