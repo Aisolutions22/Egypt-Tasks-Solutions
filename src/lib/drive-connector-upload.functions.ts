@@ -12,6 +12,12 @@ const InputSchema = z.object({
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google_drive";
 
+function detailError(base: string, step: string, status: number | null, body: string | null): string {
+  const statusText = status !== null ? ` [كود: ${status}]` : "";
+  const bodyText = body ? ` — تفاصيل: ${body.slice(0, 200)}` : "";
+  return `${base} [خطوة: ${step}]${statusText}${bodyText}`;
+}
+
 export const uploadDriveFileNative = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => InputSchema.parse(data))
@@ -23,7 +29,7 @@ export const uploadDriveFileNative = createServerFn({ method: "POST" })
         hasLovableKey: Boolean(lovableKey),
         hasGoogleDriveKey: Boolean(driveKey),
       });
-      return { ok: false as const, error: "تكامل Google Drive غير مُفعّل. برجاء إعادة ربط Google Drive من الإعدادات." };
+      return { ok: false as const, error: detailError("تكامل Google Drive غير مُفعّل. برجاء إعادة ربط Google Drive من الإعدادات.", "credentials-check", null, null) };
     }
 
     const authHeaders = {
@@ -33,7 +39,7 @@ export const uploadDriveFileNative = createServerFn({ method: "POST" })
 
     try {
       if (data.base64Data.length * 0.75 > 100 * 1024 * 1024) {
-        return { ok: false as const, error: "الملف كبير جداً (الحد الأقصى 100 ميجابايت)." };
+        return { ok: false as const, error: detailError("الملف كبير جداً (الحد الأقصى 100 ميجابايت).", "size-check", null, null) };
       }
 
       const { data: settings } = await context.supabase
@@ -65,7 +71,9 @@ export const uploadDriveFileNative = createServerFn({ method: "POST" })
           const listJson = (await listRes.json()) as { files?: Array<{ id: string }> };
           folderId = listJson.files?.[0]?.id;
         } else {
-          console.error("[drive-native] folder list failed", listRes.status, (await listRes.text()).slice(0, 500));
+          const text = await listRes.text();
+          console.error("[drive-native] folder list failed", listRes.status, text.slice(0, 500));
+          return { ok: false as const, error: detailError("فشل البحث عن مجلد الشركة على Google Drive.", "folder-list", listRes.status, text) };
         }
 
         if (!folderId) {
@@ -77,7 +85,9 @@ export const uploadDriveFileNative = createServerFn({ method: "POST" })
           if (createRes.ok) {
             folderId = ((await createRes.json()) as { id?: string }).id;
           } else {
-            console.error("[drive-native] folder create failed", createRes.status, (await createRes.text()).slice(0, 500));
+            const text = await createRes.text();
+            console.error("[drive-native] folder create failed", createRes.status, text.slice(0, 500));
+            return { ok: false as const, error: detailError("فشل إنشاء مجلد الشركة على Google Drive.", "folder-create", createRes.status, text) };
           }
         }
 
@@ -139,13 +149,13 @@ export const uploadDriveFileNative = createServerFn({ method: "POST" })
         if (uploadRes.status === 401 || uploadRes.status === 403) {
           return {
             ok: false as const,
-            error: "لا توجد صلاحية للرفع على Google Drive. برجاء إعادة ربط حساب Google Drive.",
+            error: detailError("لا توجد صلاحية للرفع على Google Drive. برجاء إعادة ربط حساب Google Drive.", "multipart-upload", uploadRes.status, text),
           };
         }
         if (uploadRes.status === 429) {
-          return { ok: false as const, error: "تم تجاوز الحد المسموح من الرفع مؤقتاً. حاول بعد قليل." };
+          return { ok: false as const, error: detailError("تم تجاوز الحد المسموح من الرفع مؤقتاً. حاول بعد قليل.", "multipart-upload", uploadRes.status, text) };
         }
-        return { ok: false as const, error: `فشل رفع الملف إلى Google Drive (رمز ${uploadRes.status}).` };
+        return { ok: false as const, error: detailError(`فشل رفع الملف إلى Google Drive (رمز ${uploadRes.status}).`, "multipart-upload", uploadRes.status, text) };
       }
 
       let json: { id?: string; webViewLink?: string };
@@ -153,10 +163,10 @@ export const uploadDriveFileNative = createServerFn({ method: "POST" })
         json = JSON.parse(text);
       } catch {
         console.error("[drive-native] bad JSON", text.slice(0, 500));
-        return { ok: false as const, error: "استجابة غير صالحة من Google Drive أثناء الرفع." };
+        return { ok: false as const, error: detailError("استجابة غير صالحة من Google Drive أثناء الرفع.", "parse-upload-response", uploadRes.status, text) };
       }
       if (!json.id) {
-        return { ok: false as const, error: "لم يتم إنشاء الملف على Google Drive." };
+        return { ok: false as const, error: detailError("لم يتم إنشاء الملف على Google Drive.", "verify-file-id", uploadRes.status, text) };
       }
 
       // Make the file viewable by anyone with the link (best effort).
@@ -178,6 +188,6 @@ export const uploadDriveFileNative = createServerFn({ method: "POST" })
     } catch (err) {
       const e = err as Error;
       console.error("[drive-native] exception", { name: e?.name, message: e?.message });
-      return { ok: false as const, error: `تعذر رفع الملف: ${e?.message ?? "خطأ غير معروف"}` };
+      return { ok: false as const, error: detailError(`تعذر رفع الملف: ${e?.message ?? "خطأ غير معروف"}`, "exception", null, null) };
     }
   });
