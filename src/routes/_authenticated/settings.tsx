@@ -14,7 +14,7 @@ import { AvatarCircle } from "@/components/avatar-circle";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import Cropper, { type Area } from "react-easy-crop";
 import { offboardColleague, resetColleaguePassword, backfillProfileEmails } from "@/lib/admin.functions";
-import { uploadDriveFileNative } from "@/lib/drive-connector-upload.functions";
+
 
 import { toast } from "sonner";
 import { UserX, Moon, Sun, KeyRound, Camera } from "lucide-react";
