@@ -105,17 +105,31 @@ function SettingsPage() {
     if (!cropSrc || !croppedPixels || !me) return;
     setUploading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("غير مسجل دخول");
       const blob = await getCroppedBlob(cropSrc, croppedPixels);
-      const path = `${user.id}/avatar.jpg`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, blob, { upsert: true, contentType: "image/jpeg" });
-      if (upErr) throw upErr;
-      const { data: signed, error: signErr } = await supabase.storage
-        .from("avatars")
-        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-      if (signErr || !signed) throw signErr ?? new Error("فشل توليد رابط الصورة");
-      const url = signed.signedUrl;
+      const base64Data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = String(reader.result || "");
+          const idx = result.indexOf(",");
+          resolve(idx >= 0 ? result.slice(idx + 1) : result);
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+      const res = await uploadAvatarFile({
+        data: {
+          taskTitle: "",
+          fileName: "profile-photo.jpg",
+          displayName: `${me.full_name} - Profile Photo`,
+          mimeType: "image/jpeg",
+          base64Data,
+        },
+      });
+      if (!res.ok) {
+        toast.error(res.error || "فشل رفع الصورة إلى Google Drive");
+        return;
+      }
+      const url = `https://drive.google.com/thumbnail?id=${res.driveFileId}&sz=w400`;
       const { error: updErr } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", me.id);
       if (updErr) throw updErr;
       toast.success("تم تحديث الصورة");
@@ -123,11 +137,12 @@ function SettingsPage() {
       qc.invalidateQueries({ queryKey: ["profiles"] });
       setCropSrc(null);
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "فشل الرفع");
+      toast.error(err instanceof Error ? err.message : "فشل رفع الصورة إلى Google Drive");
     } finally {
       setUploading(false);
     }
   }
+
 
   async function removeAvatar() {
     if (!me) return;
