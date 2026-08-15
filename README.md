@@ -21,20 +21,18 @@ Built on Lovable, backed by Supabase, with archiving to Google Sheets and file/e
 
 ## Environment Secrets Required
 
-- GOOGLE_SERVICE_ACCOUNT_JSON
-- GOOGLE_SHEET_ID
-- GOOGLE_APPS_SCRIPT_URL
-- GOOGLE_APPS_SCRIPT_SECRET
-- SEED_OWNER_TOKEN, SEED_OWNER_EMAIL, SEED_OWNER_PASSWORD
-- RESEND_API_KEY
+- GOOGLE_SHEET_ID — the spreadsheet (ID or full URL) used as the archive
+- SEED_OWNER_TOKEN, SEED_OWNER_EMAIL, SEED_OWNER_PASSWORD — one-time Owner bootstrap
+
+No Google Cloud Console project, Apps Script deployment, or service-account JSON is needed.
 
 ## Setup for a New Client
 
 1. Remix this project in Lovable
-2. Configure all secrets above
-3. Share the Google Sheet with the service account email; set the Apps Script Drive folder
+2. Open Settings → Integrations and click **Connect** on Google Drive, Gmail, and Google Sheets
+3. Set GOOGLE_SHEET_ID plus the SEED_OWNER_* secrets
 4. Visit /api/public/seed-owner?token=... once to bootstrap the Owner account
-5. Set company logo from in-app Settings
+5. Set company logo and company name from in-app Settings
 
 ## Security Notes
 

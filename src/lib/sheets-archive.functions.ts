@@ -11,68 +11,6 @@ const InputSchema = z.object({
   whenText: z.string(),
 });
 
-function b64urlFromBytes(bytes: Uint8Array): string {
-  let bin = "";
-  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-}
-
-function b64urlFromString(s: string): string {
-  return b64urlFromBytes(new TextEncoder().encode(s));
-}
-
-export function pemToDer(pem: string): Uint8Array {
-  const body = pem
-    .replace(/-----BEGIN [^-]+-----/g, "")
-    .replace(/-----END [^-]+-----/g, "")
-    .replace(/\s+/g, "");
-  const bin = atob(body);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
-}
-
-export async function getAccessToken(
-  clientEmail: string,
-  privateKeyPem: string,
-  scope: string,
-): Promise<string> {
-  const header = { alg: "RS256", typ: "JWT" };
-  const iat = Math.floor(Date.now() / 1000);
-  const claims = {
-    iss: clientEmail,
-    scope,
-    aud: "https://oauth2.googleapis.com/token",
-    iat,
-    exp: iat + 3600,
-  };
-  const signingInput = `${b64urlFromString(JSON.stringify(header))}.${b64urlFromString(JSON.stringify(claims))}`;
-
-  const der = pemToDer(privateKeyPem.replace(/\\n/g, "\n"));
-  const derBuf = der.buffer.slice(der.byteOffset, der.byteOffset + der.byteLength) as ArrayBuffer;
-  const key = await crypto.subtle.importKey(
-    "pkcs8",
-    derBuf,
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const sigBuf = await crypto.subtle.sign(
-    "RSASSA-PKCS1-v1_5",
-    key,
-    new TextEncoder().encode(signingInput),
-  );
-  const jwt = `${signingInput}.${b64urlFromBytes(new Uint8Array(sigBuf))}`;
-
-  const res = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${encodeURIComponent(jwt)}`,
-  });
-  if (!res.ok) throw new Error(`token ${res.status}: ${await res.text()}`);
-  const json = (await res.json()) as { access_token: string };
-  return json.access_token;
-}
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google_sheets";
 
