@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
       { name: "description", content: "إدارة ملفك الشخصي، الإعدادات العامة، وإدارة الموظفين في Ai Tasks Solutions." },
       { property: "og:title", content: "Settings — Ai Tasks Solutions" },
       { property: "og:description", content: "إدارة ملفك الشخصي، الإعدادات العامة، وإدارة الموظفين في Ai Tasks Solutions." },
-      { property: "og:url", content: "https://ai-tasks-solutions.lovable.app/settings" },
+      { property: "og:url", content: "https://egypt-ai-tasks.lovable.app/settings" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -317,12 +317,12 @@ function SettingsPage() {
                   )}
                 </div>
                 {isAdminOnly && p.role !== "owner" && (
-                  <Button size="icon" variant="ghost" onClick={() => resetColleaguePw(p.id, p.full_name)} title="إعادة تعيين كلمة المرور">
+                  <Button size="icon" variant="ghost" onClick={() => resetColleaguePw(p.id, p.full_name)} title={`إعادة تعيين كلمة المرور لـ ${p.full_name}`} aria-label={`إعادة تعيين كلمة المرور لـ ${p.full_name}`}>
                     <KeyRound className="h-4 w-4" />
                   </Button>
                 )}
                 {isAdminOnly && p.role !== "owner" && (
-                  <Button size="icon" variant="ghost" onClick={() => offboardCol(p.id, p.full_name)} title="إقالة الزميل">
+                  <Button size="icon" variant="ghost" onClick={() => offboardCol(p.id, p.full_name)} title={`إقالة ${p.full_name}`} aria-label={`إقالة الزميل ${p.full_name}`}>
                     <UserX className="h-4 w-4 text-destructive" />
                   </Button>
                 )}

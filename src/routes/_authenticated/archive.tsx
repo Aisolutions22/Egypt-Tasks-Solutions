@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/archive")({
       { name: "description", content: "تصفح أرشيف المهام المغلقة، ابحث وراجع سجل الفريق في Ai Tasks Solutions." },
       { property: "og:title", content: "Archive — Ai Tasks Solutions" },
       { property: "og:description", content: "تصفح أرشيف المهام المغلقة، ابحث وراجع سجل الفريق في Ai Tasks Solutions." },
-      { property: "og:url", content: "https://ai-tasks-solutions.lovable.app/archive" },
+      { property: "og:url", content: "https://egypt-ai-tasks.lovable.app/archive" },
       { name: "robots", content: "noindex" },
     ],
   }),

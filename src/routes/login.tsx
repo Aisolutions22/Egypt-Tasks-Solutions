@@ -20,10 +20,10 @@ export const Route = createFileRoute("/login")({
       { name: "description", content: "سجّل دخولك إلى Ai Tasks Solutions، نظام إدارة المهام الذكي بالعربية للفرق والشركات." },
       { property: "og:title", content: "تسجيل الدخول — Ai Tasks Solutions" },
       { property: "og:description", content: "سجّل دخولك إلى Ai Tasks Solutions، نظام إدارة المهام الذكي بالعربية للفرق والشركات." },
-      { property: "og:url", content: "https://ai-tasks-solutions.lovable.app/login" },
+      { property: "og:url", content: "https://egypt-ai-tasks.lovable.app/login" },
     ],
     links: [
-      { rel: "canonical", href: "https://ai-tasks-solutions.lovable.app/login" },
+      { rel: "canonical", href: "https://egypt-ai-tasks.lovable.app/login" },
     ],
   }),
   component: LoginPage,
@@ -61,6 +61,15 @@ function LoginPage() {
         <div className="flex flex-col items-center text-center mb-6">
           <h1 className="text-2xl font-bold whitespace-pre-wrap">{"Ai Tasks Solutions\u00a0\nنظام إدارة المهام الذكي"}</h1>
           <p className="text-sm text-muted-foreground mt-1">سجّل دخولك للمتابعة</p>
+          <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+            نظام إدارة المهام الذكي بالعربية: وزّع المهام على فريقك، حدّد المواعيد النهائية، وتابع نسب الإنجاز
+            لحظة بلحظة من لوحة تحكم واحدة.
+          </p>
+          <ul className="text-sm text-muted-foreground mt-3 space-y-1 text-right list-disc pr-5">
+            <li>توزيع المهام على الموظفين مع إشعارات فورية بالبريد الإلكتروني</li>
+            <li>متابعة حالة كل مهمة ونسبة إنجازها ومحادثة مباشرة داخل المهمة</li>
+            <li>أرشيف كامل للمهام والمرفقات مع صلاحيات دقيقة لكل دور</li>
+          </ul>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
           <div>

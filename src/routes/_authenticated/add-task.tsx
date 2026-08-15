@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/add-task")({
       { name: "description", content: "أنشئ مهمة جديدة، حدد الموظفين المسؤولين، وحدد الموعد النهائي في Ai Tasks Solutions." },
       { property: "og:title", content: "إضافة مهمة — Ai Tasks Solutions" },
       { property: "og:description", content: "أنشئ مهمة جديدة، حدد الموظفين المسؤولين، وحدد الموعد النهائي في Ai Tasks Solutions." },
-      { property: "og:url", content: "https://ai-tasks-solutions.lovable.app/add-task" },
+      { property: "og:url", content: "https://egypt-ai-tasks.lovable.app/add-task" },
       { name: "robots", content: "noindex" },
     ],
   }),

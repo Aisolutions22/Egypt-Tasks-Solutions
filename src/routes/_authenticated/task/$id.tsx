@@ -26,12 +26,13 @@ export const Route = createFileRoute("/_authenticated/task/$id")({
     const { data: p } = await supabase.from("profiles").select("role").eq("user_id", data.user.id).maybeSingle();
     if (p?.role === "owner") throw redirect({ to: "/dashboard" });
   },
-  head: () => ({
+  head: ({ params }) => ({
     meta: [
       { title: "تفاصيل المهمة — Ai Tasks Solutions" },
       { name: "description", content: "اعرض تفاصيل المهمة، حالة الإنجاز، المحادثة بين الفريق، والمرفقات في Ai Tasks Solutions." },
       { property: "og:title", content: "تفاصيل المهمة — Ai Tasks Solutions" },
       { property: "og:description", content: "اعرض تفاصيل المهمة، حالة الإنجاز، المحادثة بين الفريق، والمرفقات في Ai Tasks Solutions." },
+      { property: "og:url", content: `https://egypt-ai-tasks.lovable.app/task/${params.id}` },
       { name: "robots", content: "noindex" },
     ],
   }),

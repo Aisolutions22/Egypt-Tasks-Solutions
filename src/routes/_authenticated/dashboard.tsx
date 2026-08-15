@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { name: "description", content: "لوحة التحكم: تابع مهام الفريق، حالة الإنجاز، والمهام المتأخرة في Ai Tasks Solutions." },
       { property: "og:title", content: "Dashboard — Ai Tasks Solutions" },
       { property: "og:description", content: "لوحة التحكم: تابع مهام الفريق، حالة الإنجاز، والمهام المتأخرة في Ai Tasks Solutions." },
-      { property: "og:url", content: "https://ai-tasks-solutions.lovable.app/dashboard" },
+      { property: "og:url", content: "https://egypt-ai-tasks.lovable.app/dashboard" },
       { name: "robots", content: "noindex" },
     ],
   }),
