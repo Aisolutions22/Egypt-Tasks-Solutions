@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
       { name: "description", content: "إدارة ملفك الشخصي، الإعدادات العامة، وإدارة الموظفين في Ai Tasks Solutions." },
       { property: "og:title", content: "Settings — Ai Tasks Solutions" },
       { property: "og:description", content: "إدارة ملفك الشخصي، الإعدادات العامة، وإدارة الموظفين في Ai Tasks Solutions." },
-      { property: "og:url", content: "https://ai-tasks-solutions.lovable.app/settings" },
+      { property: "og:url", content: "https://egypt-ai-tasks.lovable.app/settings" },
       { name: "robots", content: "noindex" },
     ],
   }),

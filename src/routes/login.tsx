@@ -20,10 +20,10 @@ export const Route = createFileRoute("/login")({
       { name: "description", content: "سجّل دخولك إلى Ai Tasks Solutions، نظام إدارة المهام الذكي بالعربية للفرق والشركات." },
       { property: "og:title", content: "تسجيل الدخول — Ai Tasks Solutions" },
       { property: "og:description", content: "سجّل دخولك إلى Ai Tasks Solutions، نظام إدارة المهام الذكي بالعربية للفرق والشركات." },
-      { property: "og:url", content: "https://ai-tasks-solutions.lovable.app/login" },
+      { property: "og:url", content: "https://egypt-ai-tasks.lovable.app/login" },
     ],
     links: [
-      { rel: "canonical", href: "https://ai-tasks-solutions.lovable.app/login" },
+      { rel: "canonical", href: "https://egypt-ai-tasks.lovable.app/login" },
     ],
   }),
   component: LoginPage,

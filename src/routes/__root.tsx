@@ -78,7 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "Ai Tasks Solutions نظام إدارة المهام الذكي" },
       { property: "og:description", content: "Ai Tasks Solutions: نظام عربي ذكي لإدارة المهام، توزيع الأعمال، متابعة الإنجاز، والتواصل بين الفريق في مكان واحد." },
       { name: "twitter:description", content: "Ai Tasks Solutions: نظام عربي ذكي لإدارة المهام، توزيع الأعمال، متابعة الإنجاز، والتواصل بين الفريق في مكان واحد." },
-      { property: "og:url", content: "https://ai-tasks-solutions.lovable.app/" },
+      { property: "og:url", content: "https://egypt-ai-tasks.lovable.app/" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/KtqGVkh2ZOQmeKb7IKlh7rKzoS92/social-images/social-1783047215913-ChatGPT_Image_Jul_3,_2026,_05_51_15_AM.webp" },
@@ -102,12 +102,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             {
               "@type": "Organization",
               name: "Ai Tasks Solutions",
-              url: "https://ai-tasks-solutions.lovable.app/",
+              url: "https://egypt-ai-tasks.lovable.app/",
             },
             {
               "@type": "WebSite",
               name: "Ai Tasks Solutions",
-              url: "https://ai-tasks-solutions.lovable.app/",
+              url: "https://egypt-ai-tasks.lovable.app/",
               inLanguage: "ar",
               description: "نظام عربي ذكي لإدارة المهام، توزيع الأعمال، متابعة الإنجاز، والتواصل بين الفريق في مكان واحد.",
             },
