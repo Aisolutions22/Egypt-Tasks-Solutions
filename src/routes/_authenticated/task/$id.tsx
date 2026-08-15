@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { archiveMessageToSheet } from "@/lib/sheets-archive.functions";
-import { uploadDriveFile } from "@/lib/drive-upload.functions";
+import { uploadDriveFileNative } from "@/lib/drive-connector-upload.functions";
 
 export const Route = createFileRoute("/_authenticated/task/$id")({
   beforeLoad: async () => {
@@ -114,7 +114,7 @@ function TaskDetail() {
   const [highlightAttId, setHighlightAttId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const archiveToSheet = useServerFn(archiveMessageToSheet);
-  const uploadFile = useServerFn(uploadDriveFile);
+  const uploadFile = useServerFn(uploadDriveFileNative);
   const myAssignment = task?.task_assignments?.find((a: { user_id: string }) => a.user_id === me?.id);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -332,7 +332,7 @@ function TaskDetail() {
         },
       });
       if (!res.ok) {
-        toast.error("فشل رفع الملف");
+        toast.error(res.error || "فشل رفع الملف إلى Google Drive");
         return;
       }
       const { data: inserted, error: insErr } = await supabase.from("task_attachments").insert({
@@ -355,8 +355,8 @@ function TaskDetail() {
       qc.invalidateQueries({ queryKey: ["task-attachments", id] });
       setPendingFile(null);
       setDisplayName("");
-    } catch {
-      toast.error("فشل رفع الملف");
+    } catch (err) {
+      toast.error(`فشل رفع الملف: ${(err as Error)?.message ?? "خطأ غير متوقع"}`);
     } finally {
       setUploading(false);
     }
