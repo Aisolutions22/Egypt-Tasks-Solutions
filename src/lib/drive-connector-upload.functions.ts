@@ -19,7 +19,10 @@ export const uploadDriveFileNative = createServerFn({ method: "POST" })
     const lovableKey = process.env['LOVABLE_API_KEY'];
     const driveKey = process.env['GOOGLE_DRIVE_API_KEY'];
     if (!lovableKey || !driveKey) {
-      console.error("[drive-native] missing LOVABLE_API_KEY / GOOGLE_DRIVE_API_KEY");
+      console.error("[drive-native] missing credentials", {
+        hasLovableKey: Boolean(lovableKey),
+        hasGoogleDriveKey: Boolean(driveKey),
+      });
       return { ok: false as const, error: "تكامل Google Drive غير مُفعّل. برجاء إعادة ربط Google Drive من الإعدادات." };
     }
 
