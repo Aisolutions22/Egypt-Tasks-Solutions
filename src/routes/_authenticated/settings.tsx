@@ -110,7 +110,9 @@ function SettingsPage() {
     setUploading(true);
     try {
       const blob = await getCroppedBlob(cropSrc, croppedPixels);
-      const path = `${me.id}/avatar.jpg`;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("لم يتم التعرف على المستخدم");
+      const path = `${user.id}/avatar.jpg`;
       const { error: upErr } = await supabase.storage
         .from("avatars")
         .upload(path, blob, { upsert: true, contentType: "image/jpeg" });
@@ -131,6 +133,7 @@ function SettingsPage() {
       setUploading(false);
     }
   }
+
 
 
   async function removeAvatar() {
