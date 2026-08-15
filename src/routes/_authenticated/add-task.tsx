@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { AvatarCircle } from "@/components/avatar-circle";
-import { sendTaskEmail } from "@/lib/apps-script-email.functions";
+import { sendTaskEmailGmail } from "@/lib/gmail-send.functions";
 import { archiveMessageToSheet } from "@/lib/sheets-archive.functions";
 import { formatArDateTime } from "@/lib/date-ar";
 import { toast } from "sonner";
@@ -40,7 +40,7 @@ function AddTaskPage() {
   const { data: me } = useMyProfile();
   const { data: profiles = [] } = useAllProfiles();
   const employees = profiles.filter((p) => p.is_active && (p.role === "employee" || p.role === "admin"));
-  const sendEmail = useServerFn(sendTaskEmail);
+  const sendEmail = useServerFn(sendTaskEmailGmail);
   const archiveToSheet = useServerFn(archiveMessageToSheet);
   const qc = useQueryClient();
 
