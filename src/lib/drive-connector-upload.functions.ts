@@ -116,14 +116,22 @@ export const uploadDriveFileNative = createServerFn({ method: "POST" })
       body.set(bytes, head.length);
       body.set(tail, head.length + bytes.length);
 
-      const uploadRes = await fetch(
-        `${GATEWAY}/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`,
-        {
+      const doUpload = () =>
+        fetch(`${GATEWAY}/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`, {
           method: "POST",
           headers: { ...authHeaders, "Content-Type": `multipart/related; boundary=${boundary}` },
           body,
-        },
-      );
+        });
+
+      // One immediate retry, but only for network-level failures (thrown fetch
+      // errors / timeouts) — never for auth or other HTTP status responses.
+      let uploadRes: Response;
+      try {
+        uploadRes = await doUpload();
+      } catch (netErr) {
+        console.error("[drive-native] upload network error, retrying once", (netErr as Error).message);
+        uploadRes = await doUpload();
+      }
 
       const text = await uploadRes.text();
       if (!uploadRes.ok) {
