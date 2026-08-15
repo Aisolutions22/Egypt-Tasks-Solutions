@@ -38,11 +38,13 @@ export const uploadDriveFileNative = createServerFn({ method: "POST" })
 
       const { data: settings } = await context.supabase
         .from("app_settings")
-        .select("company_name")
+        .select("company_name, drive_folder_id")
         .eq("id", 1)
         .single();
       const companyName =
         (settings as { company_name?: string } | null)?.company_name ?? "Ai Tasks Solutions";
+      const cachedFolderId =
+        (settings as { drive_folder_id?: string | null } | null)?.drive_folder_id ?? undefined;
 
       const dotIdx = data.fileName.lastIndexOf(".");
       const extension = dotIdx >= 0 ? data.fileName.slice(dotIdx) : "";
