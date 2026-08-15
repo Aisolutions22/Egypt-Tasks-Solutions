@@ -2,7 +2,7 @@
 
 A white-label, Arabic-first (RTL) internal task-management platform built for managers who need a lightweight, permission-aware system to assign, track, and archive their team's work.
 
-Built on Lovable, backed by Supabase, with archiving to Google Sheets and file/email handling via a Google Apps Script Web App.
+Built on Lovable, backed by Supabase, with file storage, email, and archiving handled through the native Google Drive, Gmail, and Google Sheets integrations.
 
 ## Roles
 
@@ -14,8 +14,8 @@ Built on Lovable, backed by Supabase, with archiving to Google Sheets and file/e
 
 - Frontend/backend: TanStack Start (React 19)
 - Database/Auth/Realtime: Supabase, RLS enforced at DB level
-- External archive: Google Sheets API (Service Account JWT via Web Crypto API)
-- File storage + email: Google Apps Script Web App (shared-secret authenticated)
+- External archive: Google Sheets via the native connector
+- File storage + email: Google Drive and Gmail via the native connectors
 - Styling: Tailwind CSS + shadcn/ui, dark "Technicolor" animated theme
 - Font: Tajawal
 
