@@ -39,6 +39,8 @@ function SettingsPage() {
   const offboard = useServerFn(offboardColleague);
   const resetPw = useServerFn(resetColleaguePassword);
   const backfillEmails = useServerFn(backfillProfileEmails);
+  const uploadAvatarFile = useServerFn(uploadDriveFileNative);
+
   const isAdmin = me?.role === "admin" || me?.role === "owner";
   const isAdminOnly = me?.role === "admin";
   const { data: emailById } = useProfileEmails(isAdmin);
